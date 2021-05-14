@@ -1,0 +1,10 @@
+## Interface: 11305
+## Title: WishlistLC
+## Version 0.1
+## Notes: Version 0.1
+## Author: Darkonode
+## DefaultState: enabled
+## SavedVariables: WislistLC_DB
+
+config.lua
+init.lua
