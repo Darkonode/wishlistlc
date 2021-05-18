@@ -21,7 +21,7 @@ namespace.commands = {
 
 local function HandleSlashCommands(str)	
 	if (#str == 0) then	
-		-- User just entered "/at" with no additional args.
+		-- User just entered "/wlc" with no additional args.
 		namespace.commands.help();
 		return;		
 	end	
@@ -59,7 +59,7 @@ end
 
 function namespace:Print(...)
     local hex = select(4, self.Config:GetThemeColor());
-    local prefix = string.format("|cff%s%s|r", hex:upper(), "WislistLC:");	
+    local prefix = string.format("|cff%s%s|r", hex:upper(), "WislistLC " .. self.Config:GetAddonVersion() .. ": ");	
     DEFAULT_CHAT_FRAME:AddMessage(string.join(" ", prefix, ...));
 end
 
@@ -90,7 +90,7 @@ function namespace:init(event, name)
 	SLASH_WishlistLC1 = "/wlc"
 	SlashCmdList.WishlistLC = HandleSlashCommands
 
-	namespace:Print("version 0.1 loaded.")
+	namespace:Print("Addon loaded.")
 end
 
 local events = CreateFrame("Frame")

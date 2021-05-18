@@ -16,15 +16,22 @@ local defaults = {
 		g = 0.4,
 		b = 0,
 		hex = "Ff6b00"
-	}
+	},
+	version = "v0.2"
 }
 
 -------------------------------
--- Event handlers
+-- Event handlers and misc.
 -------------------------------
 function Config:Toggle()
 	local menu = ConfigWin or Config:CreateMenu()
 	menu:SetShown(not menu:IsShown())
+	namespace.filter = "Shermanar Great-Ring"
+	print(string.match("Shermanar Great-Ring", namespace.filter))
+	namespace.Kara.GetLoot()
+	for key, item in next, namespace.searchResult do
+		print(item.slot)
+	end
 end
 
 function Config:GetThemeColor()
@@ -32,17 +39,21 @@ function Config:GetThemeColor()
 	return c.r, c.g, c.b, c.hex
 end
 
-local function Tab_OnClick(self)
-	local SelectedTabID = PanelTemplates_GetSelectedTab(self:GetParent())
+function Config:GetAddonVersion()
+	return defaults.version
+end
+
+local function Tab_OnClick(tab)
+	local SelectedTabID = PanelTemplates_GetSelectedTab(tab:GetParent())
 	if (SelectedTabID) then
-		if (SelectedTabID ~= self:GetID()) then
+		if (SelectedTabID ~= tab:GetID()) then
 			local TabName = "WLC_ConfigWinTab" .. SelectedTabID
 			_G[TabName].content:Hide()
 		end
 	end
 	
-	PanelTemplates_SetTab(self:GetParent(), self:GetID())
-	self.content:Show()
+	PanelTemplates_SetTab(tab:GetParent(), tab:GetID())
+	tab.content:Show()
 end
 
 -------------------------------
@@ -141,7 +152,7 @@ function Config:CreateMenu()
 	ConfigWin:SetPoint("CENTER", UIParent, "CENTER")
 	ConfigWin.title = ConfigWin:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
 	ConfigWin.title:SetPoint("CENTER", ConfigWin.TitleBg, "CENTER", 0, 1)
-	ConfigWin.title:SetText("Wislist Lootcouncil v0.1")
+	ConfigWin.title:SetText("Wislist Lootcouncil " .. Config.GetAddonVersion())
 
 
 	local kara, gruul, magth = SetTabs(ConfigWin, 3, "Karazhan", "Gruul", "Magth")
