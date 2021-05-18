@@ -1034,7 +1034,7 @@ local malchezaar = {
 	}
 }
 
-local allTables = {trash, recipes, attumen, moroes,
+local allEncounters = {trash, recipes, attumen, moroes,
 					maiden, opera, curator, chess,
 					terestian, shade, netherspite,
 					nightbane, malchezaar
@@ -1051,13 +1051,13 @@ local function FindMatchesInTable(encounter)
 			for key, field in next, item do
 				if type(field) == "table" then
 					for i, source in next, field do
-						if string.match(source, namespace.filter) ~= nil then
+						if source == namespace.filter then
 							table.insert(namespace.searchResult, item)
 						end
 					end
 				
 				else 
-					if string.match(field, namespace.filter) ~= nil then
+					if field == namespace.filter then
 						table.insert(namespace.searchResult, item)
 					end
 				end
@@ -1066,9 +1066,9 @@ local function FindMatchesInTable(encounter)
 	end
 end
 					
-function Kara:GetLoot()
-	for key, encounter in next, allTables do
+function Kara:FilterSearch()
+	namespace.searchResult = {}
+	for key, encounter in next, allEncounters do
 		FindMatchesInTable(encounter)
 	end
-	return namespace.searchResult
 end

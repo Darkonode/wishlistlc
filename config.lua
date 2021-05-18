@@ -17,7 +17,7 @@ local defaults = {
 		b = 0,
 		hex = "Ff6b00"
 	},
-	version = "v0.2"
+	version = "v0.2",
 }
 
 -------------------------------
@@ -26,9 +26,7 @@ local defaults = {
 function Config:Toggle()
 	local menu = ConfigWin or Config:CreateMenu()
 	menu:SetShown(not menu:IsShown())
-	namespace.filter = "Shermanar Great-Ring"
-	print(string.match("Shermanar Great-Ring", namespace.filter))
-	namespace.Kara.GetLoot()
+	namespace.Utils:GetLoot("kara")
 	for key, item in next, namespace.searchResult do
 		print(item.slot)
 	end
