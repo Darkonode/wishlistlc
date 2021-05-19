@@ -26,12 +26,6 @@ local defaults = {
 function Config:Toggle()
 	local menu = ConfigWin or Config:CreateMenu()
 	menu:SetShown(not menu:IsShown())
-	--[[
-	namespace.Utils:GetLoot("kara", "One-hand")
-	for key, item in next, namespace.searchResult do
-		print(item.name)
-	end 
-	--]]
 end
 
 function Config:GetThemeColor()
@@ -48,8 +42,8 @@ local function Tab_OnClick(tab)
 	local SelectedTabID = PanelTemplates_GetSelectedTab(tab:GetParent())
 	if (SelectedTabID) then
 		if (SelectedTabID ~= tab:GetID()) then
-			local TabName = "WLC_ConfigWinTab" .. SelectedTabID
-			_G[TabName].content:Hide()
+--			local TabName = "WLC_ConfigWinTab" .. SelectedTabID
+			_G["WLC_ConfigWinTab" .. SelectedTabID].content:Hide()
 		end
 	end
 	
@@ -76,7 +70,19 @@ local function OnClickItemFrameItem(self, motion)
 end
 
 --Update item frame after change
-local function UpdateItemFrame()
+local function UpdateItemFrame(self)
+	local i = 1
+	for key, item in next, namespace.Kara.searchResult do
+		local buttonName = "%parentSearchRow".. i
+		self.buttonName = CreateFrame("Button", "$parentSearchRow" .. i, tab, "OptionsListButtonTemplate")
+		self.buttonName:SetPoint("TOPLEFT", "MIETI TÄÄ", "TOPLEFT", 4, -4 - i*10)
+		self.buttonName:SetSize(192, 10)
+		self.buttonName:SetHighlightTexture("Interface\\BUTTONS\\UI-Listbox-Highlight2")
+		self.buttonName:SetText("Yeah")
+		self.buttonName.tooltipText = "IT WORKS"
+		self.buttonName:SetScript("OnEnter", OnEnter)
+		self.buttonName:SetScript("OnLeave", OnLeave)
+		self.buttonName:SetScript("OnClick", OnClickItemFrameItem)
 
 end
 
@@ -179,15 +185,9 @@ local function PopulateTabs(tab, raid)
 	tab.searchBar:SetPoint("BOTTOM", tab.ItemFrame, "BOTTOM", 2, -16)
 	tab.searchBar:SetSize(195, 15)
 	
-	tab.searchRow = CreateFrame("Button", "$parentSearchRow", tab, "OptionsListButtonTemplate")
-	tab.searchRow:SetPoint("TOPLEFT", tab.ItemFrame, "TOPLEFT", 4, -4)
-	tab.searchRow:SetSize(192, 10)
-	tab.searchRow:SetHighlightTexture("Interface\\BUTTONS\\UI-Listbox-Highlight2")
-	tab.searchRow:SetText("Yeah")
-	tab.searchRow.tooltipText = "IT WORKS"
-	tab.searchRow:SetScript("OnEnter", OnEnter)
-	tab.searchRow:SetScript("OnLeave", OnLeave)
-	tab.searchRow:SetScript("OnClick", OnClickItemFrameItem)
+	-----------------------------
+	-- Item frame options list buttons
+	-----------------------------
 end
 
 function Config:CreateMenu()
