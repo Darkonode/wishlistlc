@@ -1051,13 +1051,13 @@ local function FindMatchesInTable(encounter)
 			for key, field in next, item do
 				if type(field) == "table" then
 					for i, source in next, field do
-						if source == namespace.filter then
+						if string.lower(source) == namespace.filter then
 							table.insert(namespace.searchResult, item)
 						end
 					end
 				
-				else 
-					if field == namespace.filter then
+				else
+					if string.lower(field) == namespace.filter then
 						table.insert(namespace.searchResult, item)
 					end
 				end

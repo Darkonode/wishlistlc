@@ -10,10 +10,12 @@ namespace.Raids = {"kara", "gruul", "magtheridon"}
 
 function Utils:GetLoot(raid, filter)
 	namespace.filter = filter or "all"
-	if raid == "kara"
+	namespace.filter = string.lower(namespace.filter)
+	if raid == "kara" then
 		namespace.Kara:FilterSearch()
 	
-	if raid == "gruul"
+	end
+	if raid == "gruul" then
 	
 	else
 	

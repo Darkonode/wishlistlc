@@ -44,7 +44,7 @@ local function HandleSlashCommands(str)
 				if (type(path[arg]) == "function") then				
 					-- all remaining args passed to our function!
 					path[arg](select(id + 1, unpack(args))); 
-					return;					
+					return;
 				elseif (type(path[arg]) == "table") then				
 					path = path[arg]; -- another sub-table found!
 				end

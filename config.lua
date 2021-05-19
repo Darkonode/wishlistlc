@@ -26,10 +26,12 @@ local defaults = {
 function Config:Toggle()
 	local menu = ConfigWin or Config:CreateMenu()
 	menu:SetShown(not menu:IsShown())
-	namespace.Utils:GetLoot("kara")
+	--[[
+	namespace.Utils:GetLoot("kara", "One-hand")
 	for key, item in next, namespace.searchResult do
-		print(item.slot)
-	end
+		print(item.name)
+	end 
+	--]]
 end
 
 function Config:GetThemeColor()
@@ -54,6 +56,20 @@ local function Tab_OnClick(tab)
 	tab.content:Show()
 end
 
+function OnEnter(self, motion)
+	GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+	GameTooltip:SetText(self:GetText())
+	GameTooltip:AddLine(tostring(self.tooltipText), 1, 1, 1)
+	GameTooltip:Show()
+end
+
+function OnLeave(self, motion)
+	GameTooltip:Hide()
+end
+
+function OnClick(self, motion)
+	print(self:GetText())
+end
 -------------------------------
 -- Config function
 -------------------------------
@@ -141,6 +157,16 @@ local function PopulateTabs(tab, raid)
 	tab.searchBar = CreateFrame("EditBox", nil, tab, "SearchBoxTemplate")
 	tab.searchBar:SetPoint("BOTTOM", tab.ItemFrame, "BOTTOM", 2, -16)
 	tab.searchBar:SetSize(195, 15)
+	
+	tab.searchRow = CreateFrame("Button", "$parentSearchRow", tab, "OptionsListButtonTemplate")
+	tab.searchRow:SetPoint("TOPLEFT", tab.ItemFrame, "TOPLEFT", 4, -4)
+	tab.searchRow:SetSize(192, 10)
+	tab.searchRow:SetHighlightTexture("Interface\\BUTTONS\\UI-Listbox-Highlight2")
+	tab.searchRow:SetText("Yeah")
+	tab.searchRow.tooltipText = "IT WORKS"
+	tab.searchRow:SetScript("OnEnter", OnEnter)
+	tab.searchRow:SetScript("OnLeave", OnLeave)
+	tab.searchRow:SetScript("OnClick", OnClick)
 end
 
 function Config:CreateMenu()

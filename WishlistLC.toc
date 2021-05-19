@@ -7,5 +7,6 @@
 ## SavedVariables: WislistLC_DB
 
 kara.lua
+lootUtils.lua
 config.lua
 init.lua
