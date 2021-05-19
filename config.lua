@@ -70,20 +70,50 @@ local function OnClickItemFrameItem(self, motion)
 end
 
 --Update item frame after change
-local function UpdateItemFrame(self)
-	local i = 1
+local function UpdateItemFrame(self, elements)
+	index = 0
+	local first_elem = true
 	for key, item in next, namespace.Kara.searchResult do
-		local buttonName = "%parentSearchRow".. i
-		self.buttonName = CreateFrame("Button", "$parentSearchRow" .. i, tab, "OptionsListButtonTemplate")
-		self.buttonName:SetPoint("TOPLEFT", "MIETI TÄÄ", "TOPLEFT", 4, -4 - i*10)
-		self.buttonName:SetSize(192, 10)
-		self.buttonName:SetHighlightTexture("Interface\\BUTTONS\\UI-Listbox-Highlight2")
-		self.buttonName:SetText("Yeah")
-		self.buttonName.tooltipText = "IT WORKS"
-		self.buttonName:SetScript("OnEnter", OnEnter)
-		self.buttonName:SetScript("OnLeave", OnLeave)
-		self.buttonName:SetScript("OnClick", OnClickItemFrameItem)
-
+		local buttonName = "%parentButton".. key
+		
+		if _G[buttonName] then
+			if first_elem then
+				_G[buttonName]:SetPoint("TOPLEFT", self, "TOPLEFT", 4, -4 - i*10)
+				first_elem = false
+			else
+				_G[buttonName]:SetPoint("TOPLEFT", buttonName, "TOPLEFT", 4, -4 - i*10)
+			end
+			index = index + 1
+			_G[buttonName]:SetShown(not self.buttonName:IsShown())
+			
+		else
+			if first_elem then
+				self.buttonName = CreateFrame("Button", buttonName, self, "OptionsListButtonTemplate")
+				self.buttonName:SetPoint("TOPLEFT", buttonName, "TOPLEFT", 4, -4 - i*10)
+				self.buttonName:SetSize(192, 10)
+				self.buttonName:SetHighlightTexture("Interface\\BUTTONS\\UI-Listbox-Highlight2")
+				self.buttonName:SetText(item.name)
+				self.buttonName.tooltipText = item.slot
+				self.buttonName:SetScript("OnEnter", OnEnter)
+				self.buttonName:SetScript("OnLeave", OnLeave)
+				self.buttonName:SetScript("OnClick", OnClickItemFrameItem)
+				first_elem = false
+				
+				
+			else
+				self.buttonName = CreateFrame("Button", buttonName, self, "OptionsListButtonTemplate")
+				self.buttonName:SetPoint("TOPLEFT", buttonName, "TOPLEFT", 4, -4 - i*10)
+				self.buttonName:SetSize(192, 10)
+				self.buttonName:SetHighlightTexture("Interface\\BUTTONS\\UI-Listbox-Highlight2")
+				self.buttonName:SetText(item.name)
+				self.buttonName.tooltipText = item.slot
+				self.buttonName:SetScript("OnEnter", OnEnter)
+				self.buttonName:SetScript("OnLeave", OnLeave)
+				self.buttonName:SetScript("OnClick", OnClickItemFrameItem)
+			end
+			index = index + 1
+		end
+	end
 end
 
 --Update wishlist frame after change
