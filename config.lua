@@ -43,6 +43,7 @@ function Config:GetAddonVersion()
 	return defaults.version
 end
 
+--Clicking open a raid tab
 local function Tab_OnClick(tab)
 	local SelectedTabID = PanelTemplates_GetSelectedTab(tab:GetParent())
 	if (SelectedTabID) then
@@ -56,20 +57,40 @@ local function Tab_OnClick(tab)
 	tab.content:Show()
 end
 
-function OnEnter(self, motion)
+--Mouseover an item in the item or wishlist frame
+local function OnEnter(self, motion)
 	GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
 	GameTooltip:SetText(self:GetText())
 	GameTooltip:AddLine(tostring(self.tooltipText), 1, 1, 1)
 	GameTooltip:Show()
 end
 
-function OnLeave(self, motion)
+--Stop mousing over an item
+local function OnLeave(self, motion)
 	GameTooltip:Hide()
 end
 
-function OnClick(self, motion)
+--Clicking an item in the item frame
+local function OnClickItemFrameItem(self, motion)
 	print(self:GetText())
 end
+
+--Update item frame after change
+local function UpdateItemFrame()
+
+end
+
+--Update wishlist frame after change
+local function UpdateWishlistFrame(self)
+
+end
+
+--Delete item from wishlist
+local OnClickWishlistItem (self)
+	namespace.Kara:DeleteFromWishlist(self)
+	UpdateWishlistFrame(self:GetParent())
+end
+
 -------------------------------
 -- Config function
 -------------------------------
@@ -166,7 +187,7 @@ local function PopulateTabs(tab, raid)
 	tab.searchRow.tooltipText = "IT WORKS"
 	tab.searchRow:SetScript("OnEnter", OnEnter)
 	tab.searchRow:SetScript("OnLeave", OnLeave)
-	tab.searchRow:SetScript("OnClick", OnClick)
+	tab.searchRow:SetScript("OnClick", OnClickItemFrameItem)
 end
 
 function Config:CreateMenu()

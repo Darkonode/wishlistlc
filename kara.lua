@@ -1083,6 +1083,17 @@ function Kara:AddToWishlist(item)
 	table.insert(wishlist, item)
 end
 
-function Kara:DeleteFromWishlist(index)
-	table.remove(index)
+function Kara:DeleteFromWishlist(item)
+	item = item or "all"
+	index = 1
+	if item == "all" then
+		wishlist = {}
+	else
+		for key, nextItem in next, wishlist do
+			if item.id == nextItem.id then
+				table.remove(index)
+				break
+			end
+		index = index + 1
+	end
 end
