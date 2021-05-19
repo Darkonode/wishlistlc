@@ -8,6 +8,8 @@ namespace.searchResult = {}
 
 local Kara = namespace.Kara
 
+local wishlist = {}
+
 local trash = {
 	RavagersBracers = {
 		id = 30687,
@@ -1071,4 +1073,16 @@ function Kara:FilterSearch()
 	for key, encounter in next, allEncounters do
 		FindMatchesInTable(encounter)
 	end
+end
+
+function Kara:GetWishlist() 
+	return wishlist
+end
+
+function Kara:AddToWishlist(item)
+	table.insert(wishlist, item)
+end
+
+function Kara:DeleteFromWishlist(index)
+	table.remove(index)
 end
