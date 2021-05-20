@@ -48,6 +48,7 @@ local function Tab_OnClick(tab)
 	end
 	
 	PanelTemplates_SetTab(tab:GetParent(), tab:GetID())
+--	tab.ItemFrame:UpdateItemFrame(tab.ItemFrame, tab.ItemFrame.elements)
 	tab.content:Show()
 end
 
@@ -71,48 +72,32 @@ end
 
 --Update item frame after change
 local function UpdateItemFrame(self, elements)
-	index = 0
+	index = 1
 	local first_elem = true
+	for key, element in next, elements do
+		element:Hide()
+	end
 	for key, item in next, namespace.Kara.searchResult do
-		local buttonName = "%parentButton".. key
+		local buttonName = self:GetParent() .. "Button" .. key
 		
 		if _G[buttonName] then
 			if first_elem then
-				_G[buttonName]:SetPoint("TOPLEFT", self, "TOPLEFT", 4, -4 - i*10)
+				_G[buttonName]:SetPoint("TOPLEFT", self, "TOPLEFT", 4, -4)
 				first_elem = false
 			else
 				_G[buttonName]:SetPoint("TOPLEFT", buttonName, "TOPLEFT", 4, -4 - i*10)
 			end
 			index = index + 1
-			_G[buttonName]:SetShown(not self.buttonName:IsShown())
+			_G[buttonName]:Show(not self.buttonName:IsShown())
+			table.insert(elements, _G[buttonName])
 			
 		else
-			if first_elem then
-				self.buttonName = CreateFrame("Button", buttonName, self, "OptionsListButtonTemplate")
-				self.buttonName:SetPoint("TOPLEFT", buttonName, "TOPLEFT", 4, -4 - i*10)
-				self.buttonName:SetSize(192, 10)
-				self.buttonName:SetHighlightTexture("Interface\\BUTTONS\\UI-Listbox-Highlight2")
-				self.buttonName:SetText(item.name)
-				self.buttonName.tooltipText = item.slot
-				self.buttonName:SetScript("OnEnter", OnEnter)
-				self.buttonName:SetScript("OnLeave", OnLeave)
-				self.buttonName:SetScript("OnClick", OnClickItemFrameItem)
-				first_elem = false
-				
-				
-			else
-				self.buttonName = CreateFrame("Button", buttonName, self, "OptionsListButtonTemplate")
-				self.buttonName:SetPoint("TOPLEFT", buttonName, "TOPLEFT", 4, -4 - i*10)
-				self.buttonName:SetSize(192, 10)
-				self.buttonName:SetHighlightTexture("Interface\\BUTTONS\\UI-Listbox-Highlight2")
-				self.buttonName:SetText(item.name)
-				self.buttonName.tooltipText = item.slot
-				self.buttonName:SetScript("OnEnter", OnEnter)
-				self.buttonName:SetScript("OnLeave", OnLeave)
-				self.buttonName:SetScript("OnClick", OnClickItemFrameItem)
-			end
+			
 			index = index + 1
+			self.buttonName:Show(not self.buttonName:IsShown())
+			table.insert(elements, self.buttonName)
 		end
+		break
 	end
 end
 
@@ -122,7 +107,7 @@ local function UpdateWishlistFrame(self)
 end
 
 --Delete item from wishlist
-local OnClickWishlistItem (self)
+local function OnClickWishlistButton (self)
 	namespace.Kara:DeleteFromWishlist(self)
 	UpdateWishlistFrame(self:GetParent())
 end
@@ -198,7 +183,7 @@ local function PopulateTabs(tab, raid)
 	-----------------------------
 	-- Item frame
 	-----------------------------
-	tab.ItemFrame = CreateFrame("Frame", nil, tab, "InsetFrameTemplate")
+	tab.ItemFrame = CreateFrame("Frame", raid .. "ItemFrame", tab, "InsetFrameTemplate")
 	
 	tab.ItemFrame:SetSize(200, 212)
 	tab.ItemFrame:SetPoint("TOPRIGHT", tab.WishlistFrame, "TOPLEFT", -10, 0)
@@ -206,7 +191,22 @@ local function PopulateTabs(tab, raid)
 	tab.ItemFrame.title = tab.ItemFrame:CreateFontString(nil, "OVERLAY")
 	tab.ItemFrame.title:SetFontObject("GameFontNormal")
 	tab.ItemFrame.title:SetPoint("BOTTOMLEFT", tab.ItemFrame, "TOPLEFT", 5, 3)
-	tab.ItemFrame.title:SetText(raid .. " drops:")
+	tab.ItemFrame.title:SetText(raid .. " drops:")tab.ItemFrame.elements = {}
+	
+	-----------------------------
+	-- Item frame scroll frame
+	-----------------------------
+	tab.ItemScrollFrame = CreateFrame("ScrollFrame", nil, tab.ItemFrame, "UIPanelScrollFrameTemplate")
+	tab.ItemScrollFrame:SetPoint("TOPLEFT", raid .. "ItemFrameBg", "TOPLEFT")
+	tab.ItemScrollFrame:SetPoint("BOTTOMRIGHT", raid .. "ItemFrameBg", "BOTTOMRIGHT")
+	
+	tab.ItemScrollFrame.bg = tab.ItemScrollFrame:CreateTexture(nil, "BACKGROUND")
+	tab.ItemScrollFrame.bg:SetAllPoints(true)
+	tab.ItemScrollFrame.bg:SetColorTexture(0.2, 0.6, 0, 0.8)
+	
+	tab.ItemScrollFrameChild = CreateFrame("Frame", nil, tab.ItemScrollFrame)
+	tab.ItemScrollFrame.ScrollBar:SetPoint("TOPRIGHT", tab.ItemScrollFrame, "TOPRIGHT", -24, 0)
+	tab.ItemScrollFrame:SetScrollChild(tab.ItemScrollFrameChild)
 	
 	-----------------------------
 	-- Item frame search bar
@@ -217,7 +217,51 @@ local function PopulateTabs(tab, raid)
 	
 	-----------------------------
 	-- Item frame options list buttons
+	-- Initially all buttons are shown
 	-----------------------------
+	namespace.Kara:FilterSearch()
+	tab.ItemFrameElements = {}
+	local ButtonIndex = {}
+	local index = 1
+	local first_elem = true
+	for key, item in next, namespace.searchResult do
+		local buttonName = key .. "Button"
+		if first_elem then
+			tab.buttonName = CreateFrame("Button", buttonName, tab.ItemScrollFrame, "OptionsListButtonTemplate")
+			tab.buttonName:SetPoint("TOPLEFT", tab.ItemScrollFrameChild, "TOPLEFT", 4, -4)
+			tab.buttonName:SetSize(178, 10)
+			tab.buttonName:SetHighlightTexture("Interface\\BUTTONS\\UI-Listbox-Highlight2")
+			tab.buttonName:SetText(item.name)
+			if item.slot then
+				tab.buttonName.tooltipText = item.itemType .. ", " .. item.slot
+			else
+				tab.buttonName.tooltipText = item.itemType
+			end
+			tab.buttonName:SetScript("OnEnter", OnEnter)
+			tab.buttonName:SetScript("OnLeave", OnLeave)
+			tab.buttonName:SetScript("OnClick", OnClickItemFrameButton)
+			table.insert(ButtonIndex, buttonName)
+			index = index + 1
+			first_elem = false
+		else
+			tab.buttonName = CreateFrame("Button", buttonName, tab.ItemScrollFrame, "OptionsListButtonTemplate")
+			tab.buttonName:SetPoint("TOPLEFT", ButtonIndex[index - 1], "TOPLEFT", 0, -11)
+			tab.buttonName:SetSize(178, 10)
+			tab.buttonName:SetHighlightTexture("Interface\\BUTTONS\\UI-Listbox-Highlight2")
+			tab.buttonName:SetText(item.name)
+			if item.slot then
+				tab.buttonName.tooltipText = item.itemType .. ", " .. item.slot
+			else
+				tab.buttonName.tooltipText = item.itemType
+			end
+			tab.buttonName:SetScript("OnEnter", OnEnter)
+			tab.buttonName:SetScript("OnLeave", OnLeave)
+			tab.buttonName:SetScript("OnClick", OnClickItemFrameButton)
+			table.insert(ButtonIndex, buttonName)
+			index = index + 1
+		end
+	end
+	tab.ItemScrollFrameChild:SetSize(195, index * 11)
 end
 
 function Config:CreateMenu()
