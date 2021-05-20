@@ -17,7 +17,7 @@ local defaults = {
 		b = 0,
 		hex = "Ff6b00"
 	},
-	version = "v0.2",
+	version = "v0.3",
 }
 
 -------------------------------
@@ -66,7 +66,7 @@ local function OnLeave(self, motion)
 end
 
 --Clicking an item in the item frame
-local function OnClickItemFrameItem(self, motion)
+local function  OnClickItemFrameButton(self, motion)
 	print(self:GetText())
 end
 
@@ -197,16 +197,13 @@ local function PopulateTabs(tab, raid)
 	-- Item frame scroll frame
 	-----------------------------
 	tab.ItemScrollFrame = CreateFrame("ScrollFrame", nil, tab.ItemFrame, "UIPanelScrollFrameTemplate")
-	tab.ItemScrollFrame:SetPoint("TOPLEFT", raid .. "ItemFrameBg", "TOPLEFT")
-	tab.ItemScrollFrame:SetPoint("BOTTOMRIGHT", raid .. "ItemFrameBg", "BOTTOMRIGHT")
-	
-	tab.ItemScrollFrame.bg = tab.ItemScrollFrame:CreateTexture(nil, "BACKGROUND")
-	tab.ItemScrollFrame.bg:SetAllPoints(true)
-	tab.ItemScrollFrame.bg:SetColorTexture(0.2, 0.6, 0, 0.8)
+	tab.ItemScrollFrame:SetPoint("TOPLEFT", raid .. "ItemFrameBg", "TOPLEFT", 0, -4)
+	tab.ItemScrollFrame:SetSize(200, 205)
 	
 	tab.ItemScrollFrameChild = CreateFrame("Frame", nil, tab.ItemScrollFrame)
 	tab.ItemScrollFrame.ScrollBar:SetPoint("TOPRIGHT", tab.ItemScrollFrame, "TOPRIGHT", -24, 0)
 	tab.ItemScrollFrame:SetScrollChild(tab.ItemScrollFrameChild)
+	tab.ItemScrollFrame:SetClipsChildren(true)
 	
 	-----------------------------
 	-- Item frame search bar
@@ -228,8 +225,8 @@ local function PopulateTabs(tab, raid)
 		local buttonName = key .. "Button"
 		if first_elem then
 			tab.buttonName = CreateFrame("Button", buttonName, tab.ItemScrollFrame, "OptionsListButtonTemplate")
-			tab.buttonName:SetPoint("TOPLEFT", tab.ItemScrollFrameChild, "TOPLEFT", 4, -4)
-			tab.buttonName:SetSize(178, 10)
+			tab.buttonName:SetPoint("TOPLEFT", tab.ItemScrollFrameChild, "TOPLEFT", 4, 0)
+			tab.buttonName:SetSize(178, 11)
 			tab.buttonName:SetHighlightTexture("Interface\\BUTTONS\\UI-Listbox-Highlight2")
 			tab.buttonName:SetText(item.name)
 			if item.slot then
@@ -246,7 +243,7 @@ local function PopulateTabs(tab, raid)
 		else
 			tab.buttonName = CreateFrame("Button", buttonName, tab.ItemScrollFrame, "OptionsListButtonTemplate")
 			tab.buttonName:SetPoint("TOPLEFT", ButtonIndex[index - 1], "TOPLEFT", 0, -11)
-			tab.buttonName:SetSize(178, 10)
+			tab.buttonName:SetSize(178, 11)
 			tab.buttonName:SetHighlightTexture("Interface\\BUTTONS\\UI-Listbox-Highlight2")
 			tab.buttonName:SetText(item.name)
 			if item.slot then
