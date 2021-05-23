@@ -9,7 +9,7 @@ namespace.searchSize = 0
 
 local Kara = namespace.Kara
 
-local wishlist = {}
+wishlists = {}
 
 local trash = {
 	["RavagersBracers"] = {
