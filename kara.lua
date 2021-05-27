@@ -9,8 +9,6 @@ namespace.searchSize = 0
 
 local Kara = namespace.Kara
 
-wishlists = {}
-
 local trash = {
 	["RavagersBracers"] = {
 		id = 30687,
@@ -1075,29 +1073,5 @@ function Kara:FilterSearch(filter)
 	namespace.searchSize = 0
 	for key, encounter in next, allEncounters do
 		FindMatchesInTable(encounter)
-	end
-end
-
-function Kara:GetWishlist() 
-	return wishlist
-end
-
-function Kara:AddToWishlist(item)
-	table.insert(wishlist, item)
-end
-
-function Kara:DeleteFromWishlist(item)
-	item = item or "all"
-	index = 1
-	if item == "all" then
-		wishlist = {}
-	else
-		for key, nextItem in next, wishlist do
-			if item.id == nextItem.id then
-				table.remove(index)
-				break
-			end
-		end
-		index = index + 1
 	end
 end

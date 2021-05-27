@@ -3,7 +3,9 @@
 -------------------------------
 local _, namespace = ...
 namespace.Config = {}
-
+namespace.Raids = {"Karazhan", "Gruul", "Magth",}
+namespace.currentRaid = 0
+namespace.wishlists = {["Karazhan"] = {},["Gruul"] = {}, ["Magth"] = {},}
 local Config = namespace.Config
 local ConfigWin
 
@@ -42,13 +44,12 @@ local function Tab_OnClick(tab)
 	local SelectedTabID = PanelTemplates_GetSelectedTab(tab:GetParent())
 	if (SelectedTabID) then
 		if (SelectedTabID ~= tab:GetID()) then
---			local TabName = "WLC_ConfigWinTab" .. SelectedTabID
 			_G["WLC_ConfigWinTab" .. SelectedTabID].content:Hide()
 		end
 	end
 	
 	PanelTemplates_SetTab(tab:GetParent(), tab:GetID())
---	tab.ItemFrame:UpdateItemFrame(tab.ItemFrame, tab.ItemFrame.elements)
+	namespace.currentRaid = tab:GetID()
 	tab.content:Show()
 end
 
@@ -65,17 +66,8 @@ local function OnLeave(self, motion)
 	GameTooltip:Hide()
 end
 
---Clicking an item in the item frame
-local function  OnClickItemFrameButton(self)
-	if _G[self:GetName() .. "Wish"]
-		
-	else
-		buttonName = self:GetName() .. "Wish"
-		button = CreateFrame("Button", buttonName, tab.WishlistFrame, "OptionsListButtonTemplate")
-end
-
 --Update item frame after change
-local function UpdateItemFrame(self)
+local function UpdateItemFrame()
 	index = 1
 	local first_elem = true
 	local ButtonIndex = {}
@@ -97,10 +89,22 @@ local function UpdateItemFrame(self)
 end
 
 --Update wishlist frame after change
-local function UpdateWishlistFrame(self)
-
+local function UpdateWishlistFrame(scrollChild, raid)
+	local index = 1
+	local first_elem = true
+	for key, itemButton in next, namespace.wishlists[raid] do
+		if first_elem then
+			itemButton:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 4, 0)
+			first_elem = false
+		else
+			button:SetPoint("TOPLEFT", namespace.wishlists[raid][index - 1], "TOPLEFT", 0, -11)
+		end
+		index = index + 1
+	end
+	scrollChild:SetSize(195, index * 11)
+	
 end
-
+	
 --Delete item from wishlist
 local function OnClickWishlistButton (self)
 	namespace.Kara:DeleteFromWishlist(self)
@@ -110,6 +114,30 @@ end
 -------------------------------
 -- Config function
 -------------------------------
+
+--------------------------------------
+--Clicking an item in the item frame--
+--------------------------------------
+-- Add the button that was pressed to the wishlist
+-- and run update on the wishlist frame 
+local function  OnClickItemFrameButton(self)
+	local buttonName = self:GetName() .. "Wish"
+	local raid = namespace.Raids[namespace.currentRaid]
+	local parentName = raid .. "WishScrollFrame"
+	if not _G[buttonName] then
+		button = CreateFrame("Button", buttonName, _G[parentName],
+		"OptionsListButtonTemplate")
+		button:SetSize(178, 11)
+		button:SetHighlightTexture("Interface\\BUTTONS\\UI-Listbox-Highlight2")
+		button:SetText(self:GetText())
+		button.tooltipText = self.tooltipText
+		button:SetScript("OnEnter", OnEnter)
+		button:SetScript("OnLeave", OnLeave)
+		button:SetScript("OnClick", OnClickItemFrameButton)
+		table.insert(namespace.wishlists[raid], button)
+	end
+	UpdateWishlistFrame(_G[raid.."WishScrollChild"], raid)
+end
 
 local function SetTabs (frame, numTabs, ...)
 	frame.numTabs = numTabs
@@ -148,7 +176,7 @@ local function PopulateTabs(tab, raid)
 	-----------------------------
 	-- Wishlist frame
 	-----------------------------
-	tab.WishlistFrame = CreateFrame("Frame", nil, tab, "InsetFrameTemplate")
+	tab.WishlistFrame = CreateFrame("Frame", raid .. "WishFrame", tab, "InsetFrameTemplate")
 
 	tab.WishlistFrame:SetSize(200, 230)
 	tab.WishlistFrame:SetPoint("TOPRIGHT", ConfigWin, "TOPRIGHT", -10, -45)
@@ -159,13 +187,13 @@ local function PopulateTabs(tab, raid)
 	tab.WishlistFrame.title:SetText(raid .. " wishlist:")
 	
 	-----------------------------
-	-- Item frame scroll frame
+	-- Wishlist scroll frame
 	-----------------------------
-	tab.WishScrollFrame = CreateFrame("ScrollFrame", nil, tab.WishlistFrame, "UIPanelScrollFrameTemplate")
+	tab.WishScrollFrame = CreateFrame("ScrollFrame", raid .. "WishScrollFrame", tab.WishlistFrame, "UIPanelScrollFrameTemplate")
 	tab.WishScrollFrame:SetPoint("TOPLEFT", raid .. "WishFrameBg", "TOPLEFT", 0, -4)
-	tab.ItemScrollFrame:SetSize(200, 223)
+	tab.WishScrollFrame:SetSize(200, 223)
 	
-	tab.WishScrollFrameChild = CreateFrame("Frame", nil, tab.WishScrollFrame)
+	tab.WishScrollFrameChild = CreateFrame("Frame", raid .. "WishScrollChild", tab.WishScrollFrame)
 	tab.WishScrollFrame.ScrollBar:SetPoint("TOPRIGHT", tab.WishScrollFrame, "TOPRIGHT", -24, 0)
 	tab.WishScrollFrame:SetScrollChild(tab.WishScrollFrameChild)
 	tab.WishScrollFrame:SetClipsChildren(true)
@@ -200,7 +228,7 @@ local function PopulateTabs(tab, raid)
 	tab.ItemFrame.title = tab.ItemFrame:CreateFontString(nil, "OVERLAY")
 	tab.ItemFrame.title:SetFontObject("GameFontNormal")
 	tab.ItemFrame.title:SetPoint("BOTTOMLEFT", tab.ItemFrame, "TOPLEFT", 5, 3)
-	tab.ItemFrame.title:SetText(raid .. " drops:")tab.ItemFrame.elements = {}
+	tab.ItemFrame.title:SetText(raid .. " drops:")
 	
 	-----------------------------
 	-- Item frame scroll frame
