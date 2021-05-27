@@ -1,2 +1,2 @@
-# WishlistLC v0.3
+# WishlistLC v0.4
 WishlistLC is a World of Warcraft addon project.
