@@ -19,7 +19,7 @@ local defaults = {
 		b = 0,
 		hex = "Ff6b00"
 	},
-	version = "v0.3",
+	version = "v0.5",
 }
 
 -------------------------------
@@ -97,8 +97,9 @@ local function UpdateWishlistFrame(scrollChild, raid)
 			itemButton:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 4, 0)
 			first_elem = false
 		else
-			button:SetPoint("TOPLEFT", namespace.wishlists[raid][index - 1], "TOPLEFT", 0, -11)
+			itemButton:SetPoint("TOPLEFT", namespace.wishlists[raid][index - 1], "TOPLEFT", 0, -11)
 		end
+		itemButton:Show()
 		index = index + 1
 	end
 	scrollChild:SetSize(195, index * 11)
@@ -107,8 +108,15 @@ end
 	
 --Delete item from wishlist
 local function OnClickWishlistButton (self)
-	namespace.Kara:DeleteFromWishlist(self)
-	UpdateWishlistFrame(self:GetParent())
+	local buttonName = self:GetName()
+	local raid = namespace.Raids[namespace.currentRaid]
+	for key, itemButton in next, namespace.wishlists[raid] do
+		if buttonName == itemButton:GetName() then
+			itemButton:Hide()
+			table.remove(namespace.wishlists[raid], key)
+		end
+	end
+	UpdateWishlistFrame(_G[raid.."WishScrollChild"], raid)
 end
 
 -------------------------------
@@ -133,8 +141,20 @@ local function  OnClickItemFrameButton(self)
 		button.tooltipText = self.tooltipText
 		button:SetScript("OnEnter", OnEnter)
 		button:SetScript("OnLeave", OnLeave)
-		button:SetScript("OnClick", OnClickItemFrameButton)
+		button:SetScript("OnClick", OnClickWishlistButton)
+		button:Show()
 		table.insert(namespace.wishlists[raid], button)
+	else
+		local alreadyInList = false		
+		for key, wishItem in next, namespace.wishlists[raid] do
+			if wishItem:GetName() == buttonName then
+				alreadyInList = true
+				break
+			end
+		end		
+		if not alreadyInList then
+			table.insert(namespace.wishlists[raid], _G[buttonName])
+		end
 	end
 	UpdateWishlistFrame(_G[raid.."WishScrollChild"], raid)
 end
