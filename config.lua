@@ -19,7 +19,7 @@ local defaults = {
 		b = 0,
 		hex = "Ff6b00"
 	},
-	version = "v0.5",
+	version = "v0.5.1",
 }
 
 -------------------------------
@@ -119,10 +119,6 @@ local function OnClickWishlistButton (self)
 	UpdateWishlistFrame(_G[raid.."WishScrollChild"], raid)
 end
 
--------------------------------
--- Config function
--------------------------------
-
 --------------------------------------
 --Clicking an item in the item frame--
 --------------------------------------
@@ -159,6 +155,16 @@ local function  OnClickItemFrameButton(self)
 	UpdateWishlistFrame(_G[raid.."WishScrollChild"], raid)
 end
 
+local function ClearWishlist()
+	local raid = namespace.Raids[namespace.currentRaid]
+	local elementsN = table.getn(namespace.wishlists[raid])
+	while namespace.wishlists[raid][1] ~= nil do
+		namespace.wishlists[raid][elementsN]:Hide()
+		table.remove(namespace.wishlists[raid])
+		elementsN = elementsN - 1
+	end
+	UpdateWishlistFrame(_G[raid.."WishScrollChild"], raid)
+end
 local function SetTabs (frame, numTabs, ...)
 	frame.numTabs = numTabs
 	local tabs = {}
@@ -228,14 +234,7 @@ local function PopulateTabs(tab, raid)
 	tab.clearButton:SetText("Clear")
 	tab.clearButton:SetNormalFontObject("GameFontNormal")
 	tab.clearButton:SetHighlightFontObject("GameFontHighlight")
-
-	-- Delete button
-	tab.delButton = CreateFrame("Button", nil, tab.clearButton, "GameMenuButtonTemplate")
-	tab.delButton:SetPoint("TOPRIGHT", tab.clearButton, "TOPLEFT", -3, 0)
-	tab.delButton:SetSize(60, 18)
-	tab.delButton:SetText("Delete")
-	tab.delButton:SetNormalFontObject("GameFontNormal")
-	tab.delButton:SetHighlightFontObject("GameFontHighlight")
+	tab.clearButton:SetScript("OnClick", ClearWishlist)
 	
 	-----------------------------
 	-- Item frame
