@@ -6,6 +6,8 @@ namespace.Config = {}
 namespace.Raids = {"Karazhan", "Gruul", "Magth",}
 namespace.currentRaid = 0
 namespace.wishlists = {["Karazhan"] = {},["Gruul"] = {}, ["Magth"] = {},}
+namespace.searchResults = {["Karazhan"] = {},["Gruul"] = {}, ["Magth"] = {},}
+namespace.ItemFrameElements = {["Karazhan"] = {},["Gruul"] = {}, ["Magth"] = {},}
 local Config = namespace.Config
 local ConfigWin
 
@@ -67,25 +69,26 @@ local function OnLeave(self, motion)
 end
 
 --Update item frame after change
-local function UpdateItemFrame()
-	index = 1
+local function UpdateItemFrame(tab, raid)
+	local index = 1
 	local first_elem = true
-	local ButtonIndex = {}
-	for key, element in next, tab.ItemFrameElements do
+	local buttonIndex = {}
+	for key, element in next, namespace.ItemFrameElements[raid] do
 		element:Hide()
 	end
-	for key, item in next, namespace.Kara.searchResult do
-		local buttonName = key .. "Button" 
+	for key, item in next, namespace.searchResults[raid] do
+		local buttonName = key .. "Button"
 		if first_elem then
-			_G[buttonName]:SetPoint("TOPLEFT", tab.ItemScrollFrameChild, "TOPLEFT", 4, 0)
+			_G[buttonName]:SetPoint("TOPLEFT", _G[raid .. "ItemScrollChild"], "TOPLEFT", 4, 0)
 			first_elem = false
 		else
-			_G[buttonName]:SetPoint("TOPLEFT", ButtonIndex[index - 1], "TOPLEFT", 0, -11)
+			_G[buttonName]:SetPoint("TOPLEFT", buttonIndex[index - 1], "TOPLEFT", 0, -11)
 		end
+		table.insert(buttonIndex, _G[buttonName])
 		index = index + 1
-		_G[buttonName]:Show(not self.buttonName:IsShown())
-		table.insert(ButtonIndex, _G[buttonName])
+		_G[buttonName]:Show()
 	end
+	_G[raid .. "ItemScrollChild"]:SetSize(195, index * 11)
 end
 
 --Update wishlist frame after change
@@ -156,6 +159,7 @@ local function  OnClickItemFrameButton(self)
 end
 
 local function ClearWishlist()
+
 	local raid = namespace.Raids[namespace.currentRaid]
 	local elementsN = table.getn(namespace.wishlists[raid])
 	while namespace.wishlists[raid][1] ~= nil do
@@ -165,6 +169,24 @@ local function ClearWishlist()
 	end
 	UpdateWishlistFrame(_G[raid.."WishScrollChild"], raid)
 end
+
+local function DoItemSearch(self)
+	local searchText = self:GetText()
+	local tab = namespace.currentRaid
+	local raid = namespace.Raids[namespace.currentRaid]
+	if searchText ~= "" then
+		namespace.Kara:FilterSearch(searchText)
+	else
+		namespace.Kara:FilterSearch()
+	end
+	UpdateItemFrame(tab, raid)
+end
+
+local function ExportWishlist()
+	local raid = namespace.Raids[namespace.currentRaid]
+	namespace.Ketho:Export(raid)
+end
+
 local function SetTabs (frame, numTabs, ...)
 	frame.numTabs = numTabs
 	local tabs = {}
@@ -198,7 +220,8 @@ end
 
 -- Create everything that exists within the tabs and do an "all"
 -- search of items
-local function PopulateTabs(tab, raid)
+local function PopulateTabs(tab, title, raidn)
+	local raid = namespace.Raids[raidn]
 	-----------------------------
 	-- Wishlist frame
 	-----------------------------
@@ -236,6 +259,15 @@ local function PopulateTabs(tab, raid)
 	tab.clearButton:SetHighlightFontObject("GameFontHighlight")
 	tab.clearButton:SetScript("OnClick", ClearWishlist)
 	
+	-- Export button
+	tab.exportButton = CreateFrame("Button", nil, tab, "GameMenuButtonTemplate")
+	tab.exportButton:SetPoint("RIGHT", tab.clearButton, "LEFT", -5, 0)
+	tab.exportButton:SetSize(60, 18)
+	tab.exportButton:SetText("Export")
+	tab.exportButton:SetNormalFontObject("GameFontNormal")
+	tab.exportButton:SetHighlightFontObject("GameFontHighlight")
+	tab.exportButton:SetScript("OnClick", ExportWishlist)
+	
 	-----------------------------
 	-- Item frame
 	-----------------------------
@@ -252,11 +284,11 @@ local function PopulateTabs(tab, raid)
 	-----------------------------
 	-- Item frame scroll frame
 	-----------------------------
-	tab.ItemScrollFrame = CreateFrame("ScrollFrame", nil, tab.ItemFrame, "UIPanelScrollFrameTemplate")
+	tab.ItemScrollFrame = CreateFrame("ScrollFrame", raid .. "ItemScrollFrame", tab.ItemFrame, "UIPanelScrollFrameTemplate")
 	tab.ItemScrollFrame:SetPoint("TOPLEFT", raid .. "ItemFrameBg", "TOPLEFT", 0, -4)
 	tab.ItemScrollFrame:SetSize(200, 205)
 	
-	tab.ItemScrollFrameChild = CreateFrame("Frame", nil, tab.ItemScrollFrame)
+	tab.ItemScrollFrameChild = CreateFrame("Frame", raid .. "ItemScrollChild", tab.ItemScrollFrame)
 	tab.ItemScrollFrame.ScrollBar:SetPoint("TOPRIGHT", tab.ItemScrollFrame, "TOPRIGHT", -24, 0)
 	tab.ItemScrollFrame:SetScrollChild(tab.ItemScrollFrameChild)
 	tab.ItemScrollFrame:SetClipsChildren(true)
@@ -267,17 +299,18 @@ local function PopulateTabs(tab, raid)
 	tab.searchBar = CreateFrame("EditBox", nil, tab, "SearchBoxTemplate")
 	tab.searchBar:SetPoint("BOTTOM", tab.ItemFrame, "BOTTOM", 2, -16)
 	tab.searchBar:SetSize(195, 15)
+	tab.searchBar:SetScript("OnEnterPressed", DoItemSearch)
+	tab.searchBar:SetAutoFocus(false)
 	
 	-----------------------------
 	-- Item frame options list buttons
 	-- Initially all buttons are shown
 	-----------------------------
 	namespace.Kara:FilterSearch()
-	tab.ItemFrameElements = {}
 	local ButtonIndex = {}
 	local index = 1
 	local first_elem = true
-	for key, item in next, namespace.searchResult do
+	for key, item in next, namespace.searchResults[raid] do
 		local buttonName = key .. "Button"
 		button = CreateFrame("Button", buttonName, tab.ItemScrollFrame, "OptionsListButtonTemplate")
 		button:SetSize(178, 11)
@@ -298,7 +331,7 @@ local function PopulateTabs(tab, raid)
 		button:SetScript("OnLeave", OnLeave)
 		button:SetScript("OnClick", OnClickItemFrameButton)
 		
-		tab.ItemFrameElements[buttonName] = button
+		namespace.ItemFrameElements[raid][buttonName] = button
 		table.insert(ButtonIndex, button)
 		index = index + 1
 	end
@@ -317,9 +350,9 @@ function Config:CreateMenu()
 
 	local kara, gruul, magth = SetTabs(ConfigWin, 3, "Karazhan", "Gruul", "Magth")
 	
-	PopulateTabs(kara, "Karazhan")
-	PopulateTabs(gruul, "Gruul's Lair")
-	PopulateTabs(magth, "Magtheridon's Lair")
+	PopulateTabs(kara, "Karazhan", 1)
+	PopulateTabs(gruul, "Gruul's Lair", 2)
+	PopulateTabs(magth, "Magtheridon's Lair", 3)
 
 	ConfigWin:Hide()
 	return ConfigWin

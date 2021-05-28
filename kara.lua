@@ -4,8 +4,6 @@
 local _, namespace = ...
 namespace.Kara = {}
 namespace.filter = nil
-namespace.searchResult = {}
-namespace.searchSize = 0
 
 local Kara = namespace.Kara
 
@@ -1044,7 +1042,7 @@ local allEncounters = {trash, recipes, attumen, moroes,
 local function FindMatchesInTable(encounter)
 	if (namespace.filter == "all") then
 		for itemKey, item in next, encounter do
-			namespace.searchResult[itemKey] = item
+			namespace.searchResults["Karazhan"][itemKey] = item
 		end
 		
 	else
@@ -1053,13 +1051,13 @@ local function FindMatchesInTable(encounter)
 				if type(field) == "table" then
 					for i, source in next, field do
 						if string.lower(source) == namespace.filter then
-							namespace.searchResult[itemKey] = item
+							namespace.searchResults["Karazhan"][itemKey] = item
 						end
 					end
 				
 				else
 					if string.lower(field) == namespace.filter then
-						namespace.searchResult[itemKey] = item
+						namespace.searchResults["Karazhan"][itemKey] = item
 					end
 				end
 			end
@@ -1069,8 +1067,7 @@ end
 					
 function Kara:FilterSearch(filter)
 	namespace.filter = filter or "all"
-	namespace.searchResult = {}
-	namespace.searchSize = 0
+	namespace.searchResults["Karazhan"] = {}
 	for key, encounter in next, allEncounters do
 		FindMatchesInTable(encounter)
 	end

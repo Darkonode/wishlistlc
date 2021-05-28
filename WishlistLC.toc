@@ -7,6 +7,6 @@
 ## SavedVariables: WislistLC_DB
 
 kara.lua
-lootUtils.lua
+kethoBox.lua
 config.lua
 init.lua
